@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -25,20 +24,19 @@ func NormalizeURL(url string) (string, error) {
 	return normURL, nil
 }
 
-
-func getUrlsFromHTML(htmlBody string) ([]string, error) {
+func GetUrlsFromHTML(htmlBody string) ([]string, error) {
 	var linkNodes []string
 
 	htmlReader := strings.NewReader(htmlBody)
 	node, err := html.Parse(htmlReader)
 	if err != nil {
 		return []string{}, fmt.Errorf("failure to parse body. error: %v", err)
-		
+
 	}
 
-	var recurse func(*html.Node) 
-	recurse = func(n *html.Node){
-		
+	var recurse func(*html.Node)
+	recurse = func(n *html.Node) {
+
 		if n.Type == html.ElementNode && n.Data == "a" {
 			linkNodes = append(linkNodes, n.Data)
 		}
@@ -56,23 +54,24 @@ func getUrlsFromHTML(htmlBody string) ([]string, error) {
 	return linkNodes, nil
 }
 
-func clientReq(url string) error {
-	var reader strings.Reader
-	var client *http.Client
-
-	req, err := http.NewRequest("GET", url, &reader)
-	if err != nil {
-		return fmt.Errorf("error making request: %v", err)
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("Request failure: %v", err)
-	}
-
-	
-
-	getUrlsFromHTML()
-
-	return nil
-}
+//
+//func clientReq(url string) error {
+//	var reader strings.Reader
+//	var client *http.Client
+//
+//	req, err := http.NewRequest("GET", url, &reader)
+//	if err != nil {
+//		return fmt.Errorf("error making request: %v", err)
+//	}
+//
+//	resp, err := client.Do(req)
+//	if err != nil {
+//		return fmt.Errorf("Request failure: %v", err)
+//	}
+//
+//	if resp.StatusCode >= 299 || resp.StatusCode <= 199 {
+//		return fmt.Errorf("Request failed with status code %d", resp.StatusCode)
+//	}
+//
+//	return nil
+//}
