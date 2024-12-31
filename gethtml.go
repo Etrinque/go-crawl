@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetHTML(rawUrl string) (string, error) {
+func GetHtml(rawUrl string) (string, error) {
 	var rawHTML string
 
 	//Use http.Get to fetch the webpage of the rawURL
