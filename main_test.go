@@ -82,11 +82,11 @@ func TestGetUrlsFromHTML(t *testing.T) {
 	for _, t := range tests {
 		lnk, err := GetUrlsFromHTML(t.inputBody)
 		if err != nil {
-			fmt.Errorf("Test %v, - '%s' FAILED: unexpected error: %v", t.name, t.inputBody, err)
+			fmt.Errorf("test %v, - '%s' FAILED: unexpected error: %v", t.name, t.inputBody, err)
 		}
 		for i := range lnk {
 			if lnk[i] != t.expected[i] {
-				fmt.Errorf("Test %v, - '%s' FAILED: expectedResult != %sgo test .", t.name, t.inputBody, t.expected[i])
+				fmt.Errorf("test %v, - '%s' FAILED: expectedResult != %sgo test ", t.name, t.inputBody, t.expected[i])
 			}
 		}
 

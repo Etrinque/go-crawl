@@ -18,6 +18,7 @@ func NormalizeURL(url string) (string, error) {
 		normalized = strings.TrimSuffix(normURL, "/")
 		return normalized, nil
 	}
+
 	return normURL, nil
 }
 

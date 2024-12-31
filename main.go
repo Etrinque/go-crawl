@@ -6,8 +6,10 @@ import (
 )
 
 func main() {
+
 	args := os.Args
 	var BASE_URL string
+	var pages = make(map[string]int)
 
 	if len(args) < 2 {
 		fmt.Println("no website provided")
@@ -20,9 +22,12 @@ func main() {
 		fmt.Printf("starting crawl of: %s...\n ", BASE_URL)
 	}
 
-	raw, err := GetHtml(BASE_URL)
-	if err != nil {
-		fmt.Println(err)
+	pages = Crawl(BASE_URL, BASE_URL, pages)
+
+	for page, _ := range pages {
+		_, err := GetHtml(page)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
-	fmt.Printf(raw)
 }

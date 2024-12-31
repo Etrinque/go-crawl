@@ -13,7 +13,6 @@ func GetUrlsFromHTML(htmlBody string) ([]string, error) {
 	node, err := html.Parse(htmlReader)
 	if err != nil {
 		return []string{}, fmt.Errorf("failure to parse body. error: %v", err)
-
 	}
 
 	var recurse func(*html.Node)
