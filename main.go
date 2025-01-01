@@ -13,9 +13,11 @@ func main() {
 
 	if len(args) < 2 {
 		fmt.Println("no website provided")
+		return
 		//os.Exit(1)
 	} else if len(args) > 2 {
 		fmt.Println("too many arguments provided")
+		return
 		//os.Exit(1)
 	} else {
 		baseUrl = args[1]

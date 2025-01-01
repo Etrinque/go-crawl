@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -14,7 +15,10 @@ func GetHtml(rawUrl string) (string, error) {
 	//Return an error if the HTTP status code is an error-level code (400+)
 	resp, err := http.Get(rawUrl)
 	if err != nil || resp.StatusCode > 399 {
-		errLog = append(errLog, errors.New("get raw url failed"))
+		errLog = append(errLog, fmt.Errorf("get raw url failed: %v", err))
+		if resp.StatusCode > 399 {
+			errLog = append(errLog, fmt.Errorf("status Code: %d", resp.StatusCode))
+		}
 		return "", err
 	}
 	defer resp.Body.Close()

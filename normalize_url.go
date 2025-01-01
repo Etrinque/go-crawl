@@ -1,25 +1,41 @@
 package main
 
 import (
+	"net/url"
 	"strings"
 )
 
-func NormalizeURL(url string) (string, error) {
-	var normURL string
-	var normalized string
+//func NormalizeURL(url string) (string, error) {
+//	var normURL string
+//	var normalized string
+//
+//	if strings.HasPrefix(url, "https://") {
+//		normURL = strings.TrimPrefix(url, "https://")
+//	} else if strings.HasPrefix(url, "http://") {
+//		normURL = strings.TrimPrefix(url, "http://")
+//	}
+//
+//	if strings.HasSuffix(normURL, "/") {
+//		normalized = strings.TrimSuffix(normURL, "/")
+//		return normalized, nil
+//	}
+//
+//	return normURL, nil
+//}
 
-	if strings.HasPrefix(url, "https://") {
-		normURL = strings.TrimPrefix(url, "https://")
-	} else if strings.HasPrefix(url, "http://") {
-		normURL = strings.TrimPrefix(url, "http://")
+func NormalizeURL(rawURL string) (string, error) {
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return "", err
 	}
 
-	if strings.HasSuffix(normURL, "/") {
-		normalized = strings.TrimSuffix(normURL, "/")
-		return normalized, nil
-	}
+	fullURL := parsedURL.Host + parsedURL.Path
 
-	return normURL, nil
+	fullURL = strings.ToLower(fullURL)
+
+	fullURL = strings.TrimPrefix(fullURL, "/")
+
+	return fullURL, nil
 }
 
 //func clientReq(url string) error {
