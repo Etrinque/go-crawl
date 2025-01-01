@@ -2,37 +2,59 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"net/url"
+	"time"
 )
 
 var errLog []error
 
-func Crawl(rawUrl, curUrl string, pages map[string]int) map[string]int {
+func Crawl(rawUrl, rawCurUrl string, pages map[string]int) map[string]int {
 
-	r, err := NormalizeURL(rawUrl)
+	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", rawUrl))
-	}
-
-	// TODO: curUrl to be replaced each depth
-	curUrl = r
-
-	// TODO: if curUrl is not of the base domain, log error and move on to next
-	if !strings.Contains(curUrl, r) {
-		errLog = append(errLog, fmt.Errorf("curUrl out of domain: %s", rawUrl))
 		return pages
 	}
 
-	_, ok := pages[curUrl]
+	baseUrl, err := url.Parse(rawUrl)
+	if err != nil {
+		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", rawUrl))
+		return pages
+	}
+
+	if curUrl.Hostname() != baseUrl.Hostname() {
+		return pages
+	}
+
+	normCurUrl, err := NormalizeURL(rawCurUrl)
+	if err != nil {
+		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", rawUrl))
+		return pages
+	}
+
+	_, ok := pages[normCurUrl]
 	if ok {
-		pages[curUrl]++
+		pages[normCurUrl]++
 		return pages
 	}
 
-	pages[curUrl] = 1
-	fmt.Println(GetHtml(curUrl))
+	pages[normCurUrl] = 1
 
-	Crawl(r, curUrl, pages)
+	rawHTML, err := GetHtml(normCurUrl)
+	if err != nil {
+		errLog = append(errLog, err)
+	}
+	fmt.Println(rawHTML)
+	time.Sleep(500 * time.Millisecond)
+
+	nextUrls, err := GetUrlsFromHTML(normCurUrl)
+	if err != nil {
+		errLog = append(errLog, err)
+	}
+
+	for _, nextUrl := range nextUrls {
+		Crawl(rawUrl, nextUrl, pages)
+	}
 
 	return pages
 }

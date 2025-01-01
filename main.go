@@ -24,10 +24,16 @@ func main() {
 
 	pages = Crawl(BASE_URL, BASE_URL, pages)
 
-	for page, _ := range pages {
-		_, err := GetHtml(page)
-		if err != nil {
-			fmt.Println(err)
+	if errLog != nil {
+		for i, err := range errLog {
+			i++
+			fmt.Printf("Error #%d: %v\n", i, err)
 		}
+	}
+
+	fmt.Println("done crawling")
+
+	for k, v := range pages {
+		fmt.Printf("Results K: %s, V: %d\n", k, v)
 	}
 }

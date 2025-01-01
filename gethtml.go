@@ -18,7 +18,8 @@ func GetHtml(rawUrl string) (string, error) {
 
 	//Return an error if the response content-type header is not text/html
 	if resp.Header.Get("Content-Type") != "text/html" {
-		return "", errors.New("content type is not text/html")
+		errLog = append(errLog, errors.New("content type is not text/html"))
+		return "", err
 	}
 
 	//Return any other possible errors
