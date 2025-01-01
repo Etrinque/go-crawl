@@ -7,10 +7,10 @@ import (
 	"strings"
 )
 
-func GetUrlsFromHTML(htmlBody, rawBaseUrl string) ([]string, error) {
+func GetUrlsFromHTML(htmlBody, baeUrl string) ([]string, error) {
 	var linkNodes []string
 
-	baseUrl, err := url.Parse(rawBaseUrl)
+	baseUrl, err := url.Parse(baeUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error parsing base url %v", baseUrl))
 		return nil, err
@@ -19,8 +19,7 @@ func GetUrlsFromHTML(htmlBody, rawBaseUrl string) ([]string, error) {
 	htmlReader := strings.NewReader(htmlBody)
 	doc, err := html.Parse(htmlReader)
 	if err != nil {
-		err = fmt.Errorf("failure to parse body. error: %v", err)
-		errLog = append(errLog, err)
+		errLog = append(errLog, fmt.Errorf("failure to parse body. error: %v", err))
 		return nil, err
 	}
 
@@ -31,7 +30,7 @@ func GetUrlsFromHTML(htmlBody, rawBaseUrl string) ([]string, error) {
 				if a.Key == "href" {
 					href, err := url.Parse(a.Val)
 					if err != nil {
-						errLog = append(errLog, fmt.Errorf("error parsing href %v", err))
+						errLog = append(errLog, fmt.Errorf("error parsing href: %v", err))
 						continue
 					}
 					resolvd := baseUrl.ResolveReference(href)

@@ -1,11 +1,9 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"sync"
-	"time"
 )
 
 var errLog []error
@@ -18,17 +16,17 @@ type concurrent struct {
 	ch    chan struct{}
 }
 
-func Crawl(rawUrl, rawCurUrl string, pages map[string]int) {
+func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
 
 	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", rawUrl))
+		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", rawBaseUrl))
 		return
 	}
 
-	baseUrl, err := url.Parse(rawUrl)
+	baseUrl, err := url.Parse(rawBaseUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", rawUrl))
+		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", rawBaseUrl))
 		return
 	}
 
@@ -38,7 +36,7 @@ func Crawl(rawUrl, rawCurUrl string, pages map[string]int) {
 
 	normCurUrl, err := NormalizeURL(rawCurUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", rawUrl))
+		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", rawBaseUrl))
 		return
 	}
 
@@ -52,20 +50,20 @@ func Crawl(rawUrl, rawCurUrl string, pages map[string]int) {
 
 	rawHTML, err := GetHtml(normCurUrl)
 	if err != nil {
-		err = errors.New("error while fetching html")
-		errLog = append(errLog, err)
+		errLog = append(errLog, fmt.Errorf("error while fetching html: %v", err))
+		return
 	}
+
 	fmt.Println(rawHTML)
-	time.Sleep(500 * time.Millisecond)
 
 	nextUrls, err := GetUrlsFromHTML(rawHTML, normCurUrl)
 	if err != nil {
-		err := errors.New("error while fetching urls")
-		errLog = append(errLog, err)
+		errLog = append(errLog, fmt.Errorf("error while fetching urls: %v", err))
+		return
 	}
 
 	for _, nextUrl := range nextUrls {
-		Crawl(rawUrl, nextUrl, pages)
+		Crawl(rawBaseUrl, nextUrl, pages)
 	}
 
 }
