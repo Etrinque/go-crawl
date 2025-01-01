@@ -12,7 +12,8 @@ func GetHtml(rawUrl string) (string, error) {
 	//Use http.Get to fetch the webpage of the rawURL
 	//Return an error if the HTTP status code is an error-level code (400+)
 	resp, err := http.Get(rawUrl)
-	if err != nil || resp.StatusCode >= 400 {
+	if err != nil || resp.StatusCode > 400 {
+		errLog = append(errLog, errors.New("get raw url failed"))
 		return "", err
 	}
 
@@ -26,6 +27,7 @@ func GetHtml(rawUrl string) (string, error) {
 	//Return the webpage's HTML if successful
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
+		errLog = append(errLog, errors.New("error reading response body"), err)
 		return "", err
 	}
 	rawHTML = string(b)

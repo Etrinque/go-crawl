@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"time"
@@ -42,6 +43,7 @@ func Crawl(rawUrl, rawCurUrl string, pages map[string]int) map[string]int {
 
 	rawHTML, err := GetHtml(normCurUrl)
 	if err != nil {
+		err = errors.New("error while fetching html")
 		errLog = append(errLog, err)
 	}
 	fmt.Println(rawHTML)
@@ -49,6 +51,7 @@ func Crawl(rawUrl, rawCurUrl string, pages map[string]int) map[string]int {
 
 	nextUrls, err := GetUrlsFromHTML(normCurUrl)
 	if err != nil {
+		err := errors.New("error while fetching urls")
 		errLog = append(errLog, err)
 	}
 
