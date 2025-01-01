@@ -17,17 +17,15 @@ func GetUrlsFromHTML(htmlBody, baeUrl string) ([]string, error) {
 	}
 
 	htmlReader := strings.NewReader(htmlBody)
-	node, err := html.Parse(htmlReader)
+	doc, err := html.Parse(htmlReader)
 	if err != nil {
 		err = fmt.Errorf("failure to parse body. error: %v", err)
 		errLog = append(errLog, err)
 		return []string{}, err
 	}
 
-	var urls []string
 	var recurse func(*html.Node)
 	recurse = func(n *html.Node) {
-
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, a := range n.Attr {
 				if a.Key == "href" {
@@ -37,16 +35,15 @@ func GetUrlsFromHTML(htmlBody, baeUrl string) ([]string, error) {
 						continue
 					}
 					resolvd := baseUrl.ResolveReference(href)
-					urls = append(urls, resolvd.String())
+					linkNodes = append(linkNodes, resolvd.String())
 				}
 			}
-			linkNodes = append(linkNodes, n.Data)
 		}
-		for n = n.FirstChild; n != nil; n = n.NextSibling {
-			recurse(n.NextSibling)
+		for child := n.FirstChild; child != nil; child = child.NextSibling {
+			recurse(child)
 		}
 	}
-	recurse(node)
+	recurse(doc)
 
 	//for _, elem := range linkNodes {
 	//	fmt.Println(elem)
