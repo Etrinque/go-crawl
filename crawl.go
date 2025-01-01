@@ -18,34 +18,34 @@ type concurrent struct {
 	ch    chan struct{}
 }
 
-func Crawl(rawUrl, rawCurUrl string, pages map[string]int) map[string]int {
+func Crawl(rawUrl, rawCurUrl string, pages map[string]int) {
 
 	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", rawUrl))
-		return pages
+		return
 	}
 
 	baseUrl, err := url.Parse(rawUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", rawUrl))
-		return pages
+		return
 	}
 
 	if curUrl.Hostname() != baseUrl.Hostname() {
-		return pages
+		return
 	}
 
 	normCurUrl, err := NormalizeURL(rawCurUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", rawUrl))
-		return pages
+		return
 	}
 
 	_, ok := pages[normCurUrl]
 	if ok {
 		pages[normCurUrl]++
-		return pages
+		return
 	}
 
 	pages[normCurUrl] = 1
@@ -68,5 +68,4 @@ func Crawl(rawUrl, rawCurUrl string, pages map[string]int) map[string]int {
 		Crawl(rawUrl, nextUrl, pages)
 	}
 
-	return pages
 }
