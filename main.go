@@ -8,7 +8,7 @@ import (
 func main() {
 
 	args := os.Args
-	var BASE_URL string
+	var baseUrl string
 	var pages = make(map[string]int)
 
 	if len(args) < 2 {
@@ -18,11 +18,22 @@ func main() {
 		fmt.Println("too many arguments provided")
 		os.Exit(1)
 	} else {
-		BASE_URL = args[1]
-		fmt.Printf("starting crawl of: %s...\n ", BASE_URL)
+		baseUrl = args[1]
+		fmt.Printf("starting crawl of: %s...\n ", baseUrl)
 	}
 
-	pages = Crawl(BASE_URL, BASE_URL, pages)
+	//root, err := url.Parse(baseUrl)
+	//if err != nil {
+	//	errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
+	//}
+
+	//concurrent := &concurrent{root: root, pages: pages, ch: make(chan struct{})}
+	//
+	//go func() {
+	//
+	//}()
+
+	pages = Crawl(baseUrl, baseUrl, pages)
 
 	if errLog != nil {
 		for i, err := range errLog {
@@ -34,6 +45,6 @@ func main() {
 	fmt.Println("done crawling")
 
 	for k, v := range pages {
-		fmt.Printf("Results K: %s, V: %d\n", k, v)
+		fmt.Printf("Results Page: %s, Occurences: %d\n", k, v)
 	}
 }

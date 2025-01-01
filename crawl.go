@@ -4,10 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"sync"
 	"time"
 )
 
 var errLog []error
+
+type concurrent struct {
+	pages map[string]int
+	root  *url.URL
+	mut   *sync.Mutex
+	wg    *sync.WaitGroup
+	ch    chan struct{}
+}
 
 func Crawl(rawUrl, rawCurUrl string, pages map[string]int) map[string]int {
 
@@ -49,7 +58,7 @@ func Crawl(rawUrl, rawCurUrl string, pages map[string]int) map[string]int {
 	fmt.Println(rawHTML)
 	time.Sleep(500 * time.Millisecond)
 
-	nextUrls, err := GetUrlsFromHTML(normCurUrl)
+	nextUrls, err := GetUrlsFromHTML(rawHTML, normCurUrl)
 	if err != nil {
 		err := errors.New("error while fetching urls")
 		errLog = append(errLog, err)
