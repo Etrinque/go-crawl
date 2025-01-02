@@ -9,12 +9,26 @@ import (
 
 var errLog []error
 
-type concurrent struct {
+type config struct {
 	pages map[string]int
 	root  *url.URL
 	mut   *sync.Mutex
 	wg    *sync.WaitGroup
 	ch    chan struct{}
+}
+
+// init new config with X number worker-pool size. Chan buffered to worker-pool size
+func newConfig(root *url.URL, numWorker int, pages map[string]int) *config {
+
+	config := &config{
+		pages: pages,
+		root:  root,
+		wg:    new(sync.WaitGroup),
+		mut:   new(sync.Mutex),
+		ch:    make(chan struct{}, numWorker),
+	}
+	config.wg.Add(numWorker)
+	return config
 }
 
 func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
@@ -66,7 +80,7 @@ func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
 	for _, nextUrl := range nextUrls {
 		Crawl(rawBaseUrl, nextUrl, pages)
 		time.Sleep(500 * time.Millisecond)
-		
+
 	}
 
 }
