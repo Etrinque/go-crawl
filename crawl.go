@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"sync"
+	"time"
 )
 
 var errLog []error
@@ -48,7 +49,7 @@ func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
 
 	pages[normCurUrl] = 1
 
-	rawHTML, err := GetHtml(normCurUrl)
+	rawHTML, err := GetHtml(rawCurUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while fetching html: %v", err))
 		return
@@ -56,7 +57,7 @@ func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
 
 	fmt.Println(rawHTML)
 
-	nextUrls, err := GetUrlsFromHTML(rawHTML, normCurUrl)
+	nextUrls, err := GetUrlsFromHTML(rawHTML, rawCurUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while fetching urls: %v", err))
 		return
@@ -64,6 +65,8 @@ func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
 
 	for _, nextUrl := range nextUrls {
 		Crawl(rawBaseUrl, nextUrl, pages)
+		time.Sleep(500 * time.Millisecond)
+		
 	}
 
 }
