@@ -31,6 +31,7 @@ func newConfig(root *url.URL, numWorker int, pages map[string]int) *config {
 	return config
 }
 
+// Crawl todo: Convert to config Method
 func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
 
 	curUrl, err := url.Parse(rawCurUrl)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 )
 
@@ -22,16 +23,12 @@ func main() {
 		fmt.Printf("starting crawl of: %s...\n ", baseUrl)
 	}
 
-	//root, err := url.Parse(baseUrl)
-	//if err != nil {
-	//	errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
-	//}
+	root, err := url.Parse(baseUrl)
+	if err != nil {
+		errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
+	}
 
-	//concurrent := &concurrent{root: root, pages: pages, ch: make(chan struct{})}
-	//
-	//go func() {
-	//
-	//}()
+	config := newConfig(root, 10, pages)
 
 	Crawl(baseUrl, baseUrl, pages)
 
