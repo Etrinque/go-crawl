@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -21,7 +22,12 @@ func main() {
 		//os.Exit(1)
 	} else {
 		baseUrl = args[1]
-		fmt.Printf("starting crawl of: %s...\n ", baseUrl)
+		fmt.Printf("Starting Crawl for: %s...\n ", baseUrl)
+	}
+
+	numWorkers, err := strconv.Atoi(args[2])
+	if err != nil {
+		fmt.Printf("Invalid number of workers provided: %v\n", err)
 	}
 
 	root, err := url.Parse(baseUrl)
@@ -29,7 +35,7 @@ func main() {
 		errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
 	}
 
-	config := c.NewConfig(root, 10, pages)
+	config := c.NewConfig(root, numWorkers, pages)
 
 	config.Crawl(root.String())
 
@@ -40,7 +46,7 @@ func main() {
 		}
 	}
 
-	fmt.Println("done crawling")
+	fmt.Printf("done crawling from root:%s ", c.root.String())
 
 	for k, v := range pages {
 		fmt.Printf("Results Page: %s, Occurences: %d\n", k, v)

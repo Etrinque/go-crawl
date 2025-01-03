@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"sync"
-	"time"
 )
 
 var errLog []error
@@ -41,7 +40,7 @@ func (c *config) Visited(rawCurrentUrl string) bool {
 	return false
 }
 
-// Crawl todo: Convert to config Method and refactor for concurrency
+// Crawl wip: Convert to config Method and refactor for concurrency
 func (c *config) Crawl(rawCurUrl string) {
 
 	curUrl, err := url.Parse(rawCurUrl)
@@ -50,13 +49,7 @@ func (c *config) Crawl(rawCurUrl string) {
 		return
 	}
 
-	baseUrl, err := url.Parse(c.root.String())
-	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", c.root))
-		return
-	}
-
-	if curUrl.Hostname() != baseUrl.Hostname() {
+	if curUrl.Hostname() != c.root.Hostname() {
 		return
 	}
 
@@ -66,13 +59,16 @@ func (c *config) Crawl(rawCurUrl string) {
 		return
 	}
 
+	c.mut.Lock()
 	_, ok := c.pages[normCurUrl]
 	if ok {
 		c.pages[normCurUrl]++
+		c.mut.Unlock()
 		return
+	} else {
+		c.pages[normCurUrl] = 1
 	}
-
-	c.pages[normCurUrl] = 1
+	c.mut.Unlock()
 
 	rawHTML, err := GetHtml(rawCurUrl)
 	if err != nil {
@@ -82,16 +78,17 @@ func (c *config) Crawl(rawCurUrl string) {
 
 	fmt.Println(rawHTML)
 
+	c.mut.Lock()
 	nextUrls, err := GetUrlsFromHTML(rawHTML, rawCurUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while fetching urls: %v", err))
 		return
 	}
+	c.mut.Unlock()
 
 	for _, nextUrl := range nextUrls {
 		c.Crawl(nextUrl)
-		time.Sleep(500 * time.Millisecond)
-
+		//time.Sleep(1 * time.Second)
 	}
 
 }
