@@ -17,8 +17,9 @@ type config struct {
 	ch    chan struct{}
 }
 
-// init new config with X number worker-pool size. Chan buffered to worker-pool size
-func newConfig(root *url.URL, numWorker int, pages map[string]int) *config {
+// NewConfig returns a new concurrency config with X number worker-pool size.
+// Channel buffered to worker-pool size
+func (c *config) NewConfig(root *url.URL, numWorker int, pages map[string]int) *config {
 
 	config := &config{
 		pages: pages,
@@ -31,18 +32,27 @@ func newConfig(root *url.URL, numWorker int, pages map[string]int) *config {
 	return config
 }
 
-// Crawl todo: Convert to config Method
-func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
+// Visited checks if the current page has been visited, false (not visited) by default
+func (c *config) Visited(rawCurrentUrl string) bool {
+	if c.pages != nil && c.pages[rawCurrentUrl] != 0 {
+		return true
+	}
+
+	return false
+}
+
+// Crawl todo: Convert to config Method and refactor for concurrency
+func (c *config) Crawl(rawCurUrl string) {
 
 	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", rawBaseUrl))
+		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", c.root))
 		return
 	}
 
-	baseUrl, err := url.Parse(rawBaseUrl)
+	baseUrl, err := url.Parse(c.root.String())
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", rawBaseUrl))
+		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", c.root))
 		return
 	}
 
@@ -52,17 +62,17 @@ func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
 
 	normCurUrl, err := NormalizeURL(rawCurUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", rawBaseUrl))
+		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", c.root))
 		return
 	}
 
-	_, ok := pages[normCurUrl]
+	_, ok := c.pages[normCurUrl]
 	if ok {
-		pages[normCurUrl]++
+		c.pages[normCurUrl]++
 		return
 	}
 
-	pages[normCurUrl] = 1
+	c.pages[normCurUrl] = 1
 
 	rawHTML, err := GetHtml(rawCurUrl)
 	if err != nil {
@@ -79,7 +89,7 @@ func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
 	}
 
 	for _, nextUrl := range nextUrls {
-		Crawl(rawBaseUrl, nextUrl, pages)
+		c.Crawl(nextUrl)
 		time.Sleep(500 * time.Millisecond)
 
 	}

@@ -11,6 +11,7 @@ func main() {
 	args := os.Args
 	var baseUrl string
 	var pages = make(map[string]int)
+	var c *config
 
 	if len(args) < 2 {
 		fmt.Println("no website provided")
@@ -28,9 +29,9 @@ func main() {
 		errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
 	}
 
-	config := newConfig(root, 10, pages)
+	config := c.NewConfig(root, 10, pages)
 
-	Crawl(baseUrl, baseUrl, pages)
+	config.Crawl(root.String())
 
 	if errLog != nil {
 		for i, err := range errLog {
