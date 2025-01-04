@@ -14,10 +14,10 @@ func main() {
 	var pages = make(map[string]int)
 	var c *config
 
-	if len(args) < 3 {
+	if len(args) < 4 {
 		fmt.Println("no website provided")
 		//os.Exit(1)
-	} else if len(args) > 3 {
+	} else if len(args) > 4 {
 		fmt.Println("too many arguments provided")
 		//os.Exit(1)
 	} else {
@@ -42,10 +42,10 @@ func main() {
 
 	config := c.NewConfig(root, numWorkers, maxPages, pages)
 
+	// FIXME: Deadlocking!
 	go func() {
 		defer config.wg.Done()
 		config.Crawl(root.String())
-
 	}()
 	config.wg.Wait()
 

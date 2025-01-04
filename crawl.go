@@ -45,7 +45,7 @@ func (c *config) Visited(rawCurrentUrl string) bool {
 // Crawl wip: Convert to config Method and refactor for concurrency
 func (c *config) Crawl(rawCurUrl string) {
 
-	if len(c.pages) > c.maxPages {
+	if len(c.pages) == c.maxPages {
 		return
 	}
 
@@ -93,8 +93,8 @@ func (c *config) Crawl(rawCurUrl string) {
 	c.mut.Unlock()
 
 	for _, nextUrl := range nextUrls {
-		c.Crawl(nextUrl)
-		//time.Sleep(1 * time.Second)
+		go c.Crawl(nextUrl)
 	}
+	//time.Sleep(1 * time.Second)
 
 }
