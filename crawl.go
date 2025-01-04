@@ -9,23 +9,25 @@ import (
 var errLog []error
 
 type config struct {
-	pages map[string]int
-	root  *url.URL
-	mut   *sync.Mutex
-	wg    *sync.WaitGroup
-	ch    chan struct{}
+	pages    map[string]int
+	maxPages int
+	root     *url.URL
+	mut      *sync.Mutex
+	wg       *sync.WaitGroup
+	ch       chan struct{}
 }
 
 // NewConfig returns a new concurrency config with X number worker-pool size.
 // Channel buffered to worker-pool size
-func (c *config) NewConfig(root *url.URL, numWorker int, pages map[string]int) *config {
+func (c *config) NewConfig(root *url.URL, numWorker int, maxPages int, pages map[string]int) *config {
 
 	config := &config{
-		pages: pages,
-		root:  root,
-		wg:    new(sync.WaitGroup),
-		mut:   new(sync.Mutex),
-		ch:    make(chan struct{}, numWorker),
+		pages:    pages,
+		maxPages: maxPages,
+		root:     root,
+		wg:       new(sync.WaitGroup),
+		mut:      new(sync.Mutex),
+		ch:       make(chan struct{}, numWorker),
 	}
 	config.wg.Add(numWorker)
 	return config
@@ -42,6 +44,10 @@ func (c *config) Visited(rawCurrentUrl string) bool {
 
 // Crawl wip: Convert to config Method and refactor for concurrency
 func (c *config) Crawl(rawCurUrl string) {
+
+	if len(c.pages) > c.maxPages {
+		return
+	}
 
 	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {

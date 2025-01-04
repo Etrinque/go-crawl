@@ -14,10 +14,10 @@ func main() {
 	var pages = make(map[string]int)
 	var c *config
 
-	if len(args) < 2 {
+	if len(args) < 3 {
 		fmt.Println("no website provided")
 		//os.Exit(1)
-	} else if len(args) > 2 {
+	} else if len(args) > 3 {
 		fmt.Println("too many arguments provided")
 		//os.Exit(1)
 	} else {
@@ -30,14 +30,24 @@ func main() {
 		fmt.Printf("Invalid number of workers provided: %v\n", err)
 	}
 
+	maxPages, err := strconv.Atoi(args[3])
+	if err != nil {
+		fmt.Printf("Invalid number of pages provided: %v\n", err)
+	}
+
 	root, err := url.Parse(baseUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
 	}
 
-	config := c.NewConfig(root, numWorkers, pages)
+	config := c.NewConfig(root, numWorkers, maxPages, pages)
 
-	config.Crawl(root.String())
+	go func() {
+		defer config.wg.Done()
+		config.Crawl(root.String())
+
+	}()
+	config.wg.Wait()
 
 	if errLog != nil {
 		for i, err := range errLog {
@@ -46,7 +56,7 @@ func main() {
 		}
 	}
 
-	fmt.Printf("done crawling from root:%s ", c.root.String())
+	fmt.Printf("done crawling from root: %s ", c.root.String())
 
 	for k, v := range pages {
 		fmt.Printf("Results Page: %s, Occurences: %d\n", k, v)
