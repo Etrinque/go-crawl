@@ -37,5 +37,4 @@ func GetHtml(rawUrl string) (string, error) {
 	rawHTML = string(b)
 
 	return rawHTML, nil
-
 }

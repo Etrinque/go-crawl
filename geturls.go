@@ -7,14 +7,8 @@ import (
 	"strings"
 )
 
-func GetUrlsFromHTML(htmlBody, baeUrl string) ([]string, error) {
+func GetUrlsFromHTML(htmlBody string, baseUrl *url.URL) ([]string, error) {
 	var linkNodes []string
-
-	baseUrl, err := url.Parse(baeUrl)
-	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error parsing base url %v", baseUrl))
-		return nil, err
-	}
 
 	htmlReader := strings.NewReader(htmlBody)
 	doc, err := html.Parse(htmlReader)
