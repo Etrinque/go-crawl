@@ -8,47 +8,75 @@ import (
 
 var errLog []error
 
-type concurrent struct {
-	pages map[string]int
-	root  *url.URL
-	mut   *sync.Mutex
-	wg    *sync.WaitGroup
-	ch    chan struct{}
+type config struct {
+	pages    map[string]int
+	maxPages int
+	root     *url.URL
+	mut      *sync.Mutex
+	wg       *sync.WaitGroup
+	ch       chan struct{}
 }
 
-func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
+// NewConfig returns a new concurrency config with X number worker-pool size.
+// Channel buffered to worker-pool size
+func (c *config) NewConfig(root *url.URL, numWorker int, maxPages int, pages map[string]int) *config {
+
+	config := &config{
+		pages:    pages,
+		maxPages: maxPages,
+		root:     root,
+		wg:       new(sync.WaitGroup),
+		mut:      new(sync.Mutex),
+		ch:       make(chan struct{}, numWorker),
+	}
+	config.wg.Add(numWorker)
+	return config
+}
+
+// Visited checks if the current page has been visited, false (not visited) by default
+func (c *config) Visited(rawCurrentUrl string) bool {
+	if c.pages != nil && c.pages[rawCurrentUrl] != 0 {
+		return true
+	}
+
+	return false
+}
+
+// Crawl wip: Convert to config Method and refactor for concurrency
+func (c *config) Crawl(rawCurUrl string) {
+
+	if len(c.pages) == c.maxPages {
+		return
+	}
 
 	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", rawBaseUrl))
+		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", c.root))
 		return
 	}
 
-	baseUrl, err := url.Parse(rawBaseUrl)
-	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", rawBaseUrl))
-		return
-	}
-
-	if curUrl.Hostname() != baseUrl.Hostname() {
+	if curUrl.Hostname() != c.root.Hostname() {
 		return
 	}
 
 	normCurUrl, err := NormalizeURL(rawCurUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", rawBaseUrl))
+		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", c.root))
 		return
 	}
 
-	_, ok := pages[normCurUrl]
+	c.mut.Lock()
+	_, ok := c.pages[normCurUrl]
 	if ok {
-		pages[normCurUrl]++
+		c.pages[normCurUrl]++
+		c.mut.Unlock()
 		return
+	} else {
+		c.pages[normCurUrl] = 1
 	}
+	c.mut.Unlock()
 
-	pages[normCurUrl] = 1
-
-	rawHTML, err := GetHtml(normCurUrl)
+	rawHTML, err := GetHtml(rawCurUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while fetching html: %v", err))
 		return
@@ -56,14 +84,17 @@ func Crawl(rawBaseUrl, rawCurUrl string, pages map[string]int) {
 
 	fmt.Println(rawHTML)
 
-	nextUrls, err := GetUrlsFromHTML(rawHTML, normCurUrl)
+	c.mut.Lock()
+	nextUrls, err := GetUrlsFromHTML(rawHTML, rawCurUrl)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while fetching urls: %v", err))
 		return
 	}
+	c.mut.Unlock()
 
 	for _, nextUrl := range nextUrls {
-		Crawl(rawBaseUrl, nextUrl, pages)
+		go c.Crawl(nextUrl)
 	}
+	//time.Sleep(1 * time.Second)
 
 }

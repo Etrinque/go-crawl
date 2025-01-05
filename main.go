@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -10,32 +12,44 @@ func main() {
 	args := os.Args
 	var baseUrl string
 	var pages = make(map[string]int)
+	var c *config
 
-	if len(args) < 2 {
+	if len(args) < 4 {
 		fmt.Println("no website provided")
 		return
 		//os.Exit(1)
-	} else if len(args) > 2 {
+	} else if len(args) > 4 {
 		fmt.Println("too many arguments provided")
 		return
 		//os.Exit(1)
 	} else {
 		baseUrl = args[1]
-		fmt.Printf("starting crawl of: %s...\n ", baseUrl)
+		fmt.Printf("Starting Crawl for: %s...\n ", baseUrl)
 	}
 
-	//root, err := url.Parse(baseUrl)
-	//if err != nil {
-	//	errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
-	//}
+	numWorkers, err := strconv.Atoi(args[2])
+	if err != nil {
+		fmt.Printf("Invalid number of workers provided: %v\n", err)
+	}
 
-	//concurrent := &concurrent{root: root, pages: pages, ch: make(chan struct{})}
-	//
-	//go func() {
-	//
-	//}()
+	maxPages, err := strconv.Atoi(args[3])
+	if err != nil {
+		fmt.Printf("Invalid number of pages provided: %v\n", err)
+	}
 
-	Crawl(baseUrl, baseUrl, pages)
+	root, err := url.Parse(baseUrl)
+	if err != nil {
+		errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
+	}
+
+	config := c.NewConfig(root, numWorkers, maxPages, pages)
+
+	// FIXME: Deadlocking!
+	go func() {
+		defer config.wg.Done()
+		config.Crawl(root.String())
+	}()
+	config.wg.Wait()
 
 	if errLog != nil {
 		for i, err := range errLog {
@@ -44,7 +58,7 @@ func main() {
 		}
 	}
 
-	fmt.Println("done crawling")
+	fmt.Printf("done crawling from root: %s ", c.root.String())
 
 	for k, v := range pages {
 		fmt.Printf("Results Page: %s, Occurences: %d\n", k, v)
