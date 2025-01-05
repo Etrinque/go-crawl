@@ -10,18 +10,15 @@ import (
 func main() {
 
 	args := os.Args
-	var baseUrl string
 	var c *config
 
 	if len(args) < 4 {
 		fmt.Println("no website provided")
+		fmt.Println("usage: ./crawler <numWorkers> <maxPages>")
 		//os.Exit(1)
 	} else if len(args) > 4 {
 		fmt.Println("too many arguments provided")
 		//os.Exit(1)
-	} else {
-		baseUrl = args[1]
-		fmt.Printf("Starting Crawl for: %s...\n ", baseUrl)
 	}
 
 	numWorkers, err := strconv.Atoi(args[2])
@@ -34,10 +31,11 @@ func main() {
 		fmt.Printf("Invalid number of pages provided: %v\n", err)
 	}
 
-	root, err := url.Parse(baseUrl)
+	root, err := url.Parse(args[1])
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
 	}
+	fmt.Printf("Starting Crawl for: %s...\n ", root)
 
 	config := c.NewConfig(root, numWorkers, maxPages)
 
@@ -53,9 +51,9 @@ func main() {
 		}
 	}
 
-	fmt.Printf("done crawling from root: %s ", c.root.String())
-
+	fmt.Println("done crawling from root: \t", root)
 	for k, v := range config.pages {
 		fmt.Printf("Results Page: %s, Occurences: %d\n", k, v)
 	}
+	fmt.Printf("crawled numPages: %d\t", config.pagesLen())
 }
