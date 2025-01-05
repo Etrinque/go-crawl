@@ -15,10 +15,8 @@ func main() {
 	if len(args) < 4 {
 		fmt.Println("no website provided")
 		fmt.Println("usage: ./crawler <numWorkers> <maxPages>")
-		//os.Exit(1)
 	} else if len(args) > 4 {
 		fmt.Println("too many arguments provided")
-		//os.Exit(1)
 	}
 
 	numWorkers, err := strconv.Atoi(args[2])
@@ -39,21 +37,20 @@ func main() {
 
 	config := c.NewConfig(root, numWorkers, maxPages)
 
-	// FIXME: Deadlocking!
 	config.wg.Add(1)
 	go config.Crawl(root.String())
 	config.wg.Wait()
 
+	fmt.Println("done crawling from root:\t", root)
+	for k, v := range config.pages {
+		fmt.Printf("Results Page:\t%s, Occurences:\t%d\n", k, v)
+	}
+	fmt.Printf("crawled numPages:\t%d", config.pagesLen())
+
 	if errLog != nil {
 		for i, err := range errLog {
 			i++
-			fmt.Printf("Error #%d: %v\n", i, err)
+			fmt.Printf("Error found #%d:\t%v\n", i, err)
 		}
 	}
-
-	fmt.Println("done crawling from root: \t", root)
-	for k, v := range config.pages {
-		fmt.Printf("Results Page: %s, Occurences: %d\n", k, v)
-	}
-	fmt.Printf("crawled numPages: %d\t", config.pagesLen())
 }

@@ -17,8 +17,8 @@ type config struct {
 	ch       chan struct{}
 }
 
-// NewConfig returns a new concurrency config with X number worker-pool size.
-// Channel buffered to worker-pool size
+// NewConfig returns a new concurrency config. Worker pool size determined at initialization
+// Channel buffered to worker-pool size.
 func (c *config) NewConfig(root *url.URL, numWorkers int, maxPages int) *config {
 
 	config := &config{
@@ -32,13 +32,15 @@ func (c *config) NewConfig(root *url.URL, numWorkers int, maxPages int) *config 
 	return config
 }
 
+// pagesLen Concurrent safe measure of page-map
 func (c *config) pagesLen() int {
 	c.mut.Lock()
 	defer c.mut.Unlock()
 	return len(c.pages)
 }
 
-// Visited checks if the current page has been visited, false (not visited) by default
+// addVisited checks if the current page has been visited, false (not visited) by default.
+// adds the page to the map. Concurrency Safe
 func (c *config) addVisited(normCurUrl string) bool {
 	c.mut.Lock()
 	defer c.mut.Unlock()
@@ -105,6 +107,5 @@ func (c *config) Crawl(rawCurUrl string) {
 		c.wg.Add(1)
 		go c.Crawl(nextUrl)
 	}
-	//time.Sleep(1 * time.Second)
 
 }
