@@ -19,14 +19,14 @@ type config struct {
 
 // NewConfig returns a new concurrency config with X number worker-pool size.
 // Channel buffered to worker-pool size
-func (c *config) NewConfig(root *url.URL, numWorker int, maxPages int, pages map[string]int) *config {
+func (c *config) NewConfig(root *url.URL, numWorker int, maxPages int) *config {
 
 	config := &config{
-		pages:    pages,
+		pages:    make(map[string]int),
 		maxPages: maxPages,
 		root:     root,
-		wg:       new(sync.WaitGroup),
-		mut:      new(sync.Mutex),
+		wg:       &sync.WaitGroup{},
+		mut:      &sync.Mutex{},
 		ch:       make(chan struct{}, numWorker),
 	}
 	config.wg.Add(numWorker)
@@ -34,20 +34,32 @@ func (c *config) NewConfig(root *url.URL, numWorker int, maxPages int, pages map
 }
 
 // Visited checks if the current page has been visited, false (not visited) by default
-func (c *config) Visited(rawCurrentUrl string) bool {
-	if c.pages != nil && c.pages[rawCurrentUrl] != 0 {
-		return true
+func (c *config) addVisited(normCurUrl string) bool {
+	c.mut.Lock()
+	defer c.mut.Unlock()
+
+	if _, ok := c.pages[normCurUrl]; ok {
+		c.pages[normCurUrl]++
+		return false
 	}
 
-	return false
+	c.pages[normCurUrl] = 1
+	return true
 }
 
-// Crawl wip: Convert to config Method and refactor for concurrency
+// Crawl is responsible for fetching -> processing -> mapping sites.
+// The function is concurrency safe. The worker pool size is determined upon program initialization.
 func (c *config) Crawl(rawCurUrl string) {
 
-	if len(c.pages) == c.maxPages {
-		return
-	}
+	//if len(c.pages) == c.maxPages {
+	//	return
+	//}
+
+	c.ch <- struct{}{}
+	defer func() {
+		<-c.ch
+		c.wg.Done()
+	}()
 
 	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {
@@ -65,16 +77,10 @@ func (c *config) Crawl(rawCurUrl string) {
 		return
 	}
 
-	c.mut.Lock()
-	_, ok := c.pages[normCurUrl]
-	if ok {
-		c.pages[normCurUrl]++
-		c.mut.Unlock()
+	isFirst := c.addVisited(normCurUrl)
+	if !isFirst {
 		return
-	} else {
-		c.pages[normCurUrl] = 1
 	}
-	c.mut.Unlock()
 
 	rawHTML, err := GetHtml(rawCurUrl)
 	if err != nil {
@@ -82,17 +88,16 @@ func (c *config) Crawl(rawCurUrl string) {
 		return
 	}
 
-	fmt.Println(rawHTML)
+	fmt.Println(rawCurUrl)
 
-	c.mut.Lock()
-	nextUrls, err := GetUrlsFromHTML(rawHTML, rawCurUrl)
+	nextUrls, err := GetUrlsFromHTML(rawHTML, c.root)
 	if err != nil {
 		errLog = append(errLog, fmt.Errorf("error while fetching urls: %v", err))
 		return
 	}
-	c.mut.Unlock()
 
 	for _, nextUrl := range nextUrls {
+		c.wg.Add(1)
 		go c.Crawl(nextUrl)
 	}
 	//time.Sleep(1 * time.Second)

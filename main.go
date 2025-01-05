@@ -11,7 +11,6 @@ func main() {
 
 	args := os.Args
 	var baseUrl string
-	var pages = make(map[string]int)
 	var c *config
 
 	if len(args) < 4 {
@@ -40,13 +39,11 @@ func main() {
 		errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
 	}
 
-	config := c.NewConfig(root, numWorkers, maxPages, pages)
+	config := c.NewConfig(root, numWorkers, maxPages)
 
 	// FIXME: Deadlocking!
-	go func() {
-		defer config.wg.Done()
-		config.Crawl(root.String())
-	}()
+	config.wg.Add(1)
+	go config.Crawl(root.String())
 	config.wg.Wait()
 
 	if errLog != nil {
@@ -58,7 +55,7 @@ func main() {
 
 	fmt.Printf("done crawling from root: %s ", c.root.String())
 
-	for k, v := range pages {
+	for k, v := range config.pages {
 		fmt.Printf("Results Page: %s, Occurences: %d\n", k, v)
 	}
 }
