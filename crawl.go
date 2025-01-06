@@ -17,9 +17,9 @@ type config struct {
 	ch       chan struct{}
 }
 
-// NewConfig returns a new concurrency config with X number worker-pool size.
-// Channel buffered to worker-pool size
-func (c *config) NewConfig(root *url.URL, numWorker int, maxPages int) *config {
+// NewConfig returns a new concurrency config. Worker pool size determined at initialization
+// Channel buffered to worker-pool size.
+func (c *config) NewConfig(root *url.URL, numWorkers int, maxPages int) *config {
 
 	config := &config{
 		pages:    make(map[string]int),
@@ -27,13 +27,20 @@ func (c *config) NewConfig(root *url.URL, numWorker int, maxPages int) *config {
 		root:     root,
 		wg:       &sync.WaitGroup{},
 		mut:      &sync.Mutex{},
-		ch:       make(chan struct{}, numWorker),
+		ch:       make(chan struct{}, numWorkers),
 	}
-	config.wg.Add(numWorker)
 	return config
 }
 
-// Visited checks if the current page has been visited, false (not visited) by default
+// pagesLen Concurrent safe measure of page-map
+func (c *config) pagesLen() int {
+	c.mut.Lock()
+	defer c.mut.Unlock()
+	return len(c.pages)
+}
+
+// addVisited checks if the current page has been visited, false (not visited) by default.
+// adds the page to the map. Concurrency Safe
 func (c *config) addVisited(normCurUrl string) bool {
 	c.mut.Lock()
 	defer c.mut.Unlock()
@@ -51,15 +58,15 @@ func (c *config) addVisited(normCurUrl string) bool {
 // The function is concurrency safe. The worker pool size is determined upon program initialization.
 func (c *config) Crawl(rawCurUrl string) {
 
-	//if len(c.pages) == c.maxPages {
-	//	return
-	//}
-
 	c.ch <- struct{}{}
 	defer func() {
 		<-c.ch
 		c.wg.Done()
 	}()
+
+	if c.pagesLen() >= c.maxPages {
+		return
+	}
 
 	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {
@@ -88,7 +95,7 @@ func (c *config) Crawl(rawCurUrl string) {
 		return
 	}
 
-	fmt.Println(rawCurUrl)
+	//fmt.Println(rawHTML)
 
 	nextUrls, err := GetUrlsFromHTML(rawHTML, c.root)
 	if err != nil {
@@ -100,6 +107,5 @@ func (c *config) Crawl(rawCurUrl string) {
 		c.wg.Add(1)
 		go c.Crawl(nextUrl)
 	}
-	//time.Sleep(1 * time.Second)
 
 }

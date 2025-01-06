@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+// GetUrlsFromHTML reads in the current raw HTML body.
+// Recursively dives through pages for <a href> tags -> child nodes.
+
 func GetUrlsFromHTML(htmlBody string, baseUrl *url.URL) ([]string, error) {
 	var linkNodes []string
 
