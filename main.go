@@ -45,6 +45,7 @@ func main() {
 	fmt.Printf("=============================\n  REPORT for %s\n=============================\n", root.String())
 
 	var tempMap []Page
+
 	for k, v := range config.pages {
 		page := Page{k, v}
 		tempMap = append(tempMap, page)

@@ -31,7 +31,7 @@ func GetHtml(rawUrl string) (string, error) {
 	//Return the webpage's HTML if successful
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error reading response body: %v"), err)
+		errLog = append(errLog, fmt.Errorf("error reading response body: %v", err))
 		return "", err
 	}
 	rawHTML = string(b)
