@@ -47,7 +47,7 @@ To install Go-Crawl, run the following commands from your terminal:
 
 * build the project
 ```shell
-> go buil -o crawl main.go
+> go build -o crawl main.go
 ```
 
 ## Usage
