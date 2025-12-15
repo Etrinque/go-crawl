@@ -8,43 +8,47 @@ import (
 	"golang.org/x/net/html"
 )
 
-// GetUrlsFromHTML reads in the current raw HTML body.
-// Recursively dives through pages for <a href> tags -> child nodes.
+// getURLsFromHTML extracts all URLs from anchor tags in the HTML body.
+// Relative URLs are resolved against the base URL.
+// Returns a slice of absolute URL strings.
 
-func GetUrlsFromHTML(htmlBody string, baseUrl *url.URL) ([]string, error) {
-	var linkNodes []string
+func getUrlsFromHTML(htmlBody string, baseUrl *url.URL) ([]string, error) {
 
 	htmlReader := strings.NewReader(htmlBody)
 	doc, err := html.Parse(htmlReader)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("failure to parse body. error: %w", err))
+		errLog = append(errLog, fmt.Errorf("failure to parse html body. error: %w", err))
 		return nil, err
 	}
 
-	var recurse func(*html.Node)
-	recurse = func(n *html.Node) {
+	var urls []string
+	var extractUrls func(*html.Node)
+
+	extractUrls = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, a := range n.Attr {
 				if a.Key == "href" {
 					href, err := url.Parse(a.Val)
 					if err != nil {
+						// Log error and skip
 						errLog = append(errLog, fmt.Errorf("error parsing href: %w", err))
 						continue
 					}
-					resolvd := baseUrl.ResolveReference(href)
-					linkNodes = append(linkNodes, resolvd.String())
+					resolvedUrls := baseUrl.ResolveReference(href)
+					urls = append(urls, resolvedUrls.String())
 				}
 			}
 		}
 		for child := n.FirstChild; child != nil; child = child.NextSibling {
-			recurse(child)
+			extractUrls(child)
 		}
 	}
-	recurse(doc)
+	extractUrls(doc)
 
-	//for _, elem := range linkNodes {
+	// TODO: Move to GUI implementation.
+	//for _, elem := range urls {
 	//	fmt.Println(elem)
 	//}
 
-	return linkNodes, nil
+	return urls, nil
 }
