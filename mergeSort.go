@@ -1,43 +1,39 @@
 package main
 
-type Page struct {
-	url string
-	val int
+type page struct {
+	url   string
+	count int
 }
 
-func MergeSort(array []Page) []Page {
+func MergeSort(pages []page) []page {
 
-	if len(array) < 2 {
-		return array
+	if len(pages) < 2 {
+		return pages
 	}
-
-	left := MergeSort(array[:len(array)/2])
-	right := MergeSort(array[len(array)/2:])
+	mid := len(pages) / 2
+	left := MergeSort(pages[:mid])
+	right := MergeSort(pages[mid:])
 	return merge(left, right)
 
 }
 
-func merge(left []Page, right []Page) []Page {
-	var i = 0
-	var j = 0
+func merge(left []page, right []page) []page {
+	i, j := 0, 0
 
-	var tmp []Page
+	result := make([]page, len(left)+len(right))
 
 	for i < len(left) && j < len(right) {
-		if left[i].val < right[j].val {
-			tmp = append(tmp, left[i])
+		if left[i].count <= right[j].count {
+			result = append(result, left[i])
 			i++
 		} else {
-			tmp = append(tmp, right[j])
+			result = append(result, right[j])
 			j++
 		}
 	}
-	for ; i < len(left); i++ {
-		tmp = append(tmp, left[i])
-	}
-	for ; j < len(right); j++ {
-		tmp = append(tmp, right[j])
-	}
 
-	return tmp
+	result = append(result, left[i])
+	result = append(result, right[j])
+
+	return result
 }
