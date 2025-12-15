@@ -11,11 +11,11 @@ func NormalizeURL(rawURL string) (string, error) {
 		return "", err
 	}
 
-	fullURL := parsedURL.Host + parsedURL.Path
+	normalized := parsedURL.Host + parsedURL.Path
 
-	fullURL = strings.ToLower(fullURL)
+	normalized = strings.ToLower(normalized)
 
-	fullURL = strings.TrimPrefix(fullURL, "/")
+	normalized = strings.TrimPrefix(normalized, "/")
 
-	return fullURL, nil
+	return normalized, nil
 }
