@@ -45,10 +45,5 @@ func getUrlsFromHTML(htmlBody string, baseUrl *url.URL) ([]string, error) {
 	}
 	extractUrls(doc)
 
-	// TODO: Move to GUI implementation.
-	//for _, elem := range urls {
-	//	fmt.Println(elem)
-	//}
-
 	return urls, nil
 }
