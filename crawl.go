@@ -8,7 +8,7 @@ import (
 
 var errLog []error
 
-type config struct {
+type Config struct {
 	pages    map[string]int
 	maxPages int
 	root     *url.URL
@@ -19,9 +19,9 @@ type config struct {
 
 // NewConfig returns a new concurrency config. Worker pool size determined at initialization
 // Channel buffered to worker-pool size.
-func (c *config) NewConfig(root *url.URL, numWorkers int, maxPages int) *config {
+func NewConfig(root *url.URL, numWorkers int, maxPages int) *Config {
 
-	config := &config{
+	config := &Config{
 		pages:    make(map[string]int),
 		maxPages: maxPages,
 		root:     root,
@@ -33,7 +33,7 @@ func (c *config) NewConfig(root *url.URL, numWorkers int, maxPages int) *config 
 }
 
 // pagesLen Concurrent safe measure of page-map
-func (c *config) pagesLen() int {
+func (c *Config) pagesLen() int {
 	c.mut.Lock()
 	defer c.mut.Unlock()
 	return len(c.pages)
@@ -41,7 +41,7 @@ func (c *config) pagesLen() int {
 
 // addVisited checks if the current page has been visited, false (not visited) by default.
 // adds the page to the map. Concurrency Safe
-func (c *config) addVisited(normCurUrl string) bool {
+func (c *Config) addVisited(normCurUrl string) bool {
 	c.mut.Lock()
 	defer c.mut.Unlock()
 
@@ -56,7 +56,7 @@ func (c *config) addVisited(normCurUrl string) bool {
 
 // Crawl is responsible for fetching -> processing -> mapping sites.
 // The function is concurrency safe. The worker pool size is determined upon program initialization.
-func (c *config) Crawl(rawCurUrl string) {
+func (c *Config) Crawl(rawCurUrl string) {
 
 	c.ch <- struct{}{}
 	defer func() {

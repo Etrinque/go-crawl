@@ -10,7 +10,6 @@ import (
 func main() {
 
 	args := os.Args
-	var c *config
 
 	if len(args) < 4 {
 		fmt.Println("no website provided")
@@ -35,14 +34,21 @@ func main() {
 	}
 	fmt.Printf("Starting Crawl for: %s...\n ", root)
 
-	config := c.NewConfig(root, numWorkers, maxPages)
+	config := NewConfig(root, numWorkers, maxPages)
 
 	config.wg.Add(1)
 	go config.Crawl(root.String())
 	config.wg.Wait()
 
 	fmt.Println("done crawling from root:\t", root)
-	fmt.Printf("=============================\n  REPORT for %s\n=============================\n", root.String())
+	var hashes = ""
+	var msg = "Root for: "
+	for range len(root.String()) + len(msg) {
+		hashes += "#"
+	}
+	fmt.Printf("%s\n"+
+		"%s%s"+
+		"\n%s\n", hashes, msg, root.String(), hashes)
 
 	var tempMap []Page
 
@@ -57,10 +63,10 @@ func main() {
 	}
 	fmt.Printf("crawled numPages:\t%d\n", config.pagesLen())
 
-	//if errLog != nil {
-	//	for i, err := range errLog {
-	//		i++
-	//		fmt.Printf("Error found #%d:\t%v\n", i, err)
-	//	}
-	//}
+	if errLog != nil {
+		for i, err := range errLog {
+			i++
+			fmt.Printf("Error found #%d:\t%v\n", i, err)
+		}
+	}
 }

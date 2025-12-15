@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/net/html"
 	"net/url"
 	"strings"
+
+	"golang.org/x/net/html"
 )
 
 // GetUrlsFromHTML reads in the current raw HTML body.
@@ -16,7 +17,7 @@ func GetUrlsFromHTML(htmlBody string, baseUrl *url.URL) ([]string, error) {
 	htmlReader := strings.NewReader(htmlBody)
 	doc, err := html.Parse(htmlReader)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("failure to parse body. error: %v", err))
+		errLog = append(errLog, fmt.Errorf("failure to parse body. error: %w", err))
 		return nil, err
 	}
 
@@ -27,7 +28,7 @@ func GetUrlsFromHTML(htmlBody string, baseUrl *url.URL) ([]string, error) {
 				if a.Key == "href" {
 					href, err := url.Parse(a.Val)
 					if err != nil {
-						errLog = append(errLog, fmt.Errorf("error parsing href: %v", err))
+						errLog = append(errLog, fmt.Errorf("error parsing href: %w", err))
 						continue
 					}
 					resolvd := baseUrl.ResolveReference(href)
