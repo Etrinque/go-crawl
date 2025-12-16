@@ -1,5 +1,5 @@
 
-<img src="https://www.github.com/etrinque/go-crawl/assets/logo.svg" width="100" height="100" alt="Go-Crawl Logo"/>
+<img src="https://github.com/Etrinque/go-crawl/blob/main/assets/logo.svg" width="100" height="100" alt="Go-Crawl Logo"/>
 
 # Go-Crawl
 
