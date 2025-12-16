@@ -1,7 +1,7 @@
 
-<img src="https://github.com/Etrinque/go-crawl/blob/main/assets/logo.svg" width="100" height="100" alt="Go-Crawl Logo"/>
 
 # Go-Crawl
+<img src="https://github.com/Etrinque/go-crawl/blob/main/assets/logo.svg" width="100" height="100" alt="Go-Crawl Logo"/>
 
 A concurrent, thread-safe web crawler built in Go that demonstrates efficient URL extraction and crawling patterns.
 
