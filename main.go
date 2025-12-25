@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+
+	"github.com/etrinque/go-crawl/util"
 )
 
 func main() {
@@ -30,11 +32,14 @@ func main() {
 
 	root, err := url.Parse(args[1])
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
+		// TODO: Refactor/Replace errLog with Logger api
+		//errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))
+		panic(err)
 	}
+
 	fmt.Printf("Starting Crawl for: %s...\n ", root)
 
-	config := NewConfig(root, numWorkers, maxPages)
+	config := newConfig(root, numWorkers, maxPages)
 
 	config.wg.Add(1)
 	go config.Crawl(root.String())
@@ -50,23 +55,23 @@ func main() {
 		"%s%s"+
 		"\n%s\n", hashes, msg, root.String(), hashes)
 
-	var tempMap []Page
+	var tempMap []util.Page
 
 	for k, v := range config.pages {
-		page := Page{k, v}
+		page := util.Page{Url: k, Count: v}
 		tempMap = append(tempMap, page)
 	}
 
-	sortedMap := MergeSort(tempMap)
+	sortedMap := util.MergeSort(tempMap)
 	for _, page := range sortedMap {
-		fmt.Printf("Found:\t%d internal links to %s\n", page.val, page.url)
+		fmt.Printf("Found:\t%d internal links to %s\n", page.Count, page.Url)
 	}
 	fmt.Printf("crawled numPages:\t%d\n", config.pagesLen())
 
-	if errLog != nil {
-		for i, err := range errLog {
-			i++
-			fmt.Printf("Error found #%d:\t%v\n", i, err)
-		}
-	}
+	//if errLog != nil {
+	//	for i, err := range errLog {
+	//		i++
+	//		fmt.Printf("Error found #%d:\t%v\n", i, err)
+	//	}
+	//}
 }

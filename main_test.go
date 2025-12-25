@@ -2,6 +2,8 @@ package main
 
 import (
 	"testing"
+
+	"github.com/etrinque/go-crawl/util"
 )
 
 func TestNormalizeURL(t *testing.T) {
@@ -35,7 +37,7 @@ func TestNormalizeURL(t *testing.T) {
 
 	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual, err := NormalizeURL(tt.inputURL)
+			actual, err := util.NormalizeURL(tt.inputURL)
 			if err != nil {
 				t.Errorf("Test %v, - '%s' FAILED: unexpected error: %v", i, tt.name, err)
 				return

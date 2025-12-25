@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"net/url"
 	"sync"
+
+	"github.com/etrinque/go-crawl/util"
 )
 
-var errLog []error
+//var errLog []error
 
 type Config struct {
 	pages    map[string]int
@@ -19,7 +20,7 @@ type Config struct {
 
 // NewConfig returns a new concurrency config. Worker pool size determined at initialization
 // Channel buffered to worker-pool size.
-func NewConfig(root *url.URL, numWorkers int, maxPages int) *Config {
+func newConfig(root *url.URL, numWorkers int, maxPages int) *Config {
 
 	config := &Config{
 		pages:    make(map[string]int),
@@ -70,7 +71,7 @@ func (c *Config) Crawl(rawCurUrl string) {
 
 	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while parsing url: %s", c.root))
+		//errLog = append(errLog, fmt.Errorf("error while parsing url: %s", c.root))
 		return
 	}
 
@@ -78,9 +79,9 @@ func (c *Config) Crawl(rawCurUrl string) {
 		return
 	}
 
-	normCurUrl, err := NormalizeURL(rawCurUrl)
+	normCurUrl, err := util.NormalizeURL(rawCurUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", c.root))
+		//errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", c.root))
 		return
 	}
 
@@ -89,17 +90,17 @@ func (c *Config) Crawl(rawCurUrl string) {
 		return
 	}
 
-	rawHTML, err := GetHtml(rawCurUrl)
+	rawHTML, err := util.GetHtml(rawCurUrl)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while fetching html: %v", err))
+		//errLog = append(errLog, fmt.Errorf("error while fetching html: %v", err))
 		return
 	}
 
 	//fmt.Println(rawHTML)
 
-	nextUrls, err := GetUrlsFromHTML(rawHTML, c.root)
+	nextUrls, err := util.GetUrlsFromHTML(rawHTML, c.root)
 	if err != nil {
-		errLog = append(errLog, fmt.Errorf("error while fetching urls: %v", err))
+		//errLog = append(errLog, fmt.Errorf("error while fetching urls: %v", err))
 		return
 	}
 
