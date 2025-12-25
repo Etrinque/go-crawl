@@ -1,0 +1,102 @@
+@import "tailwindcss";
+/*@import "tailwindcss/utilities";*/
+
+@font-face {
+    font-family: 'Orbitron';
+    src: url('./assets/Orbitron/static/Orbitron-Regular.ttf') format('truetype');
+
+}
+
+@font-face {
+    font-family: 'Oxanium';
+    src: url('./assets/Oxanium/static/Oxanium-Regular.ttf') format('truetype');
+}
+
+@theme {
+    --font-heading: Orbitron, sans-serif;
+    --font-body: Oxanium, sans-serif;
+}
+
+#root {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+
+}
+
+.logo {
+    height: 6em;
+    padding: 1.5em;
+    will-change: filter;
+    transition: filter 300ms;
+}
+
+.logo:hover {
+    filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+    filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    a:nth-of-type(2) .logo {
+        animation: logo-spin infinite 20s linear;
+    }
+}
+
+.header {
+    font-size: 2em;
+    @apply font-heading text-cyan-400 text-6xl;
+    margin-bottom: 1em;
+}
+
+.app {
+}
+
+.app > * {
+    margin: 1em;
+}
+
+.card {
+    padding: 2em;
+    @apply bg-neutral-900/75  border-2 border-blue-400/40 ;
+    @apply hover:border-blue-400/60 rounded-3xl;
+    @apply shadow-lg shadow-neutral-700/75;
+}
+
+.read-the-docs {
+    color: #888;
+}
+
+
+.form-button {
+    border-radius: .75rem;
+    border: 1px solid transparent;
+    font-weight: 500;
+    @apply font-heading;
+
+    @apply text-white p-2 m-4 min-w-[100px] hover:border-cyan-400 text-center text-xl;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+.form-button-submit {
+    @apply bg-cyan-500/60 hover:bg-cyan-600 hover:scale-[103%] transition-transform duration-150 ease-in-out
+    transform active:scale-95;
+}
+
+.form-button:focus,
+.form-button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
