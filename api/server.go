@@ -1,9 +1,14 @@
 package api
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/etrinque/go-crawl/util"
 	"github.com/gorilla/websocket"
@@ -30,20 +35,46 @@ type ProgressUpdate struct {
 var upgrader = websocket.Upgrader{}
 
 func startServer() {
-	http.HandleFunc("/", handleHome)
-	http.HandleFunc("/api/crawl", handleCrawl)
-	http.HandleFunc("/api/logs", handleLogs)
 
-	fmt.Println("Starting server on port http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	mux := http.NewServeMux()
+	s := &http.Server{
+		Addr:         ":8080",
+		Handler:      mux,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+
+	mux.HandleFunc("/", handleHome)
+	mux.HandleFunc("/api/crawl", handleCrawl)
+	mux.HandleFunc("/api/logs", handleLogs)
+
+	// gracefull shutdown
+	go func() {
+		fmt.Println("Starting server on port http://localhost:8080")
+		if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Server Failue: %+v", err)
+		}
+	}()
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, os.Interrupt)
+	<-stopChan
+	fmt.Println("Shutting down server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := s.Shutdown(ctx); err != nil {
+		log.Fatalf("Server Shutdown Failed:%+v", err)
+	}
+
 }
 
 func handleHome(w http.ResponseWriter, req *http.Request) {
-	// serve single page gui
+	// serve gui
 }
 
 func handleCrawl(w http.ResponseWriter, req *http.Request) {
-
+	// send parameters to crawlerConfig
 }
 
-func handleLogs(w http.ResponseWriter, req *http.Request) {}
+func handleLogs(w http.ResponseWriter, req *http.Request) {
+	// send logs to logOutput
+}
