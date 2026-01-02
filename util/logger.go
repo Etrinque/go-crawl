@@ -44,11 +44,11 @@ type Logger struct {
 	logChan chan LogEntry
 }
 
-// NewLogger creates a new Logger with unbounded entries slice and unbuffered channel;
+// NewLogger creates a new Logger with unbounded entries slice and buffered channel;
 func NewLogger() *Logger {
 	return &Logger{
 		entries: make([]LogEntry, 0),
-		logChan: make(chan LogEntry),
+		logChan: make(chan LogEntry, 512),
 	}
 }
 

@@ -20,7 +20,7 @@ func MergeSort(pages []Page) []Page {
 func merge(left []Page, right []Page) []Page {
 	i, j := 0, 0
 
-	result := make([]Page, len(left)+len(right))
+	result := make([]Page, 0, len(left)+len(right))
 
 	for i < len(left) && j < len(right) {
 		if left[i].Count <= right[j].Count {
@@ -32,8 +32,8 @@ func merge(left []Page, right []Page) []Page {
 		}
 	}
 
-	result = append(result, left[i])
-	result = append(result, right[j])
+	result = append(result, left[i:]...)
+	result = append(result, right[j:]...)
 
 	return result
 }

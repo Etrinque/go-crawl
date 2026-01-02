@@ -8,8 +8,8 @@ function App() {
 
 
   return (
-      <>
-        <span className={"header"}>GO-CRAWL</span>
+      <div className={""}>
+        <span className={"header "}>GO-CRAWL</span>
         <span className={"flex justify-center gap-3 m-2 text-4xl text-center"}>
           <button>
             <a>
@@ -27,13 +27,13 @@ function App() {
             </a>
           </button>
         </span>
-        <div className={"app"}>
+        <div className={"app "}>
           {/*  LOGO HERE  */}
           <ConfigContainer/>
           <Summary/>
           <LogOutput/>
         </div>
-      </>
+      </div>
   )
 }
 

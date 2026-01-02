@@ -20,7 +20,7 @@ const ConfigContainer = () => {
           className={"card"}>
         <form>
           <fieldset
-              className={"flex flex-col  p-2 text-start min-w-[480px] [&>input]:bg-neutral-800 [&>input]:border-cyan-400/50  "}>
+              className={"flex flex-col  p-2 text-start  [&>input]:bg-neutral-800 [&>input]:border-cyan-400/50  "}>
 
             <label htmlFor="url" className={" pb-2 font-body text-2xl text-center"}>Root URL </label>
             <input

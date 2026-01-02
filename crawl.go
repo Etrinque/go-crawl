@@ -9,32 +9,34 @@ import (
 
 //var errLog []error
 
-type Config struct {
+type config struct {
 	pages    map[string]int
 	maxPages int
 	root     *url.URL
 	mut      *sync.Mutex
 	wg       *sync.WaitGroup
 	ch       chan struct{}
+	logger   *util.Logger
 }
 
 // NewConfig returns a new concurrency config. Worker pool size determined at initialization
 // Channel buffered to worker-pool size.
-func newConfig(root *url.URL, numWorkers int, maxPages int) *Config {
+func newConfig(root *url.URL, numWorkers int, maxPages int) *config {
 
-	config := &Config{
+	config := &config{
 		pages:    make(map[string]int),
 		maxPages: maxPages,
 		root:     root,
 		wg:       &sync.WaitGroup{},
 		mut:      &sync.Mutex{},
 		ch:       make(chan struct{}, numWorkers),
+		logger:   util.NewLogger(),
 	}
 	return config
 }
 
 // pagesLen Concurrent safe measure of page-map
-func (c *Config) pagesLen() int {
+func (c *config) pagesLen() int {
 	c.mut.Lock()
 	defer c.mut.Unlock()
 	return len(c.pages)
@@ -42,7 +44,7 @@ func (c *Config) pagesLen() int {
 
 // addVisited checks if the current page has been visited, false (not visited) by default.
 // adds the page to the map. Concurrency Safe
-func (c *Config) addVisited(normCurUrl string) bool {
+func (c *config) addVisited(normCurUrl string) bool {
 	c.mut.Lock()
 	defer c.mut.Unlock()
 
@@ -57,7 +59,7 @@ func (c *Config) addVisited(normCurUrl string) bool {
 
 // Crawl is responsible for fetching -> processing -> mapping sites.
 // The function is concurrency safe. The worker pool size is determined upon program initialization.
-func (c *Config) Crawl(rawCurUrl string) {
+func (c *config) Crawl(rawCurUrl string) {
 
 	c.ch <- struct{}{}
 	defer func() {
@@ -71,7 +73,7 @@ func (c *Config) Crawl(rawCurUrl string) {
 
 	curUrl, err := url.Parse(rawCurUrl)
 	if err != nil {
-		//errLog = append(errLog, fmt.Errorf("error while parsing url: %s", c.root))
+		c.logger.Log(util.LogLevelError, "Failed to parse url %s: %s", rawCurUrl, err)
 		return
 	}
 
@@ -81,7 +83,7 @@ func (c *Config) Crawl(rawCurUrl string) {
 
 	normCurUrl, err := util.NormalizeURL(rawCurUrl)
 	if err != nil {
-		//errLog = append(errLog, fmt.Errorf("error while normalizing url: %s", c.root))
+		c.logger.Log(util.LogLevelError, "Failed to normalize url %s: %s", rawCurUrl, err)
 		return
 	}
 
@@ -92,7 +94,7 @@ func (c *Config) Crawl(rawCurUrl string) {
 
 	rawHTML, err := util.GetHtml(rawCurUrl)
 	if err != nil {
-		//errLog = append(errLog, fmt.Errorf("error while fetching html: %v", err))
+		c.logger.Log(util.LogLevelError, "Failed to get html from %s: %s", rawCurUrl, err)
 		return
 	}
 
@@ -100,7 +102,7 @@ func (c *Config) Crawl(rawCurUrl string) {
 
 	nextUrls, err := util.GetUrlsFromHTML(rawHTML, c.root)
 	if err != nil {
-		//errLog = append(errLog, fmt.Errorf("error while fetching urls: %v", err))
+		c.logger.Log(util.LogLevelError, "Failed to get urls from %s: %s", rawCurUrl, err)
 		return
 	}
 

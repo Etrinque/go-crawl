@@ -11,26 +11,26 @@ import (
 
 func main() {
 
-	args := os.Args
+	args := os.Args[1:]
 
-	if len(args) < 4 {
+	if len(args) < 3 {
 		fmt.Println("no website provided")
 		fmt.Println("usage: ./crawler <numWorkers> <maxPages>")
 	} else if len(args) > 4 {
 		fmt.Println("too many arguments provided")
 	}
 
-	numWorkers, err := strconv.Atoi(args[2])
+	numWorkers, err := strconv.Atoi(args[1])
 	if err != nil {
 		fmt.Printf("Invalid number of workers provided: %v\n", err)
 	}
 
-	maxPages, err := strconv.Atoi(args[3])
+	maxPages, err := strconv.Atoi(args[2])
 	if err != nil {
 		fmt.Printf("Invalid number of pages provided: %v\n", err)
 	}
 
-	root, err := url.Parse(args[1])
+	root, err := url.Parse(args[0])
 	if err != nil {
 		// TODO: Refactor/Replace errLog with Logger api
 		//errLog = append(errLog, fmt.Errorf("error parsing root: %v", err))

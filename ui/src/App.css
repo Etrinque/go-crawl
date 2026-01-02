@@ -1,20 +1,52 @@
 @import "tailwindcss";
 /*@import "tailwindcss/utilities";*/
 
-@font-face {
-    font-family: 'Orbitron';
-    src: url('./assets/Orbitron/static/Orbitron-Regular.ttf') format('truetype');
+@layer base {
 
+    @font-face {
+        font-family: 'Orbitron';
+        src: url('./assets/Orbitron/static/Orbitron-Regular.ttf') format('truetype');
+        font-weight: normal;
+
+    }
+    @font-face {
+        font-family: 'Orbitron';
+        src: url('./assets/Orbitron/static/Orbitron-Bold.ttf') format('truetype');
+        font-weight: bold;
+    }
+    @font-face {
+        font-family: 'Orbitron';
+        src: url('./assets/Orbitron/static/Orbitron-ExtraBold.ttf') format('truetype');
+        font-weight: 900;
+    }
+
+    @font-face {
+        font-family: 'Oxanium';
+        src: url('./assets/Oxanium/static/Oxanium-Regular.ttf') format('truetype');
+    }
+    @font-face {
+        font-family: 'Oxanium';
+        src: url('./assets/Oxanium/static/Oxanium-Bold.ttf') format('truetype');
+        font-weight: bold;
+    }
+    @font-face {
+        font-family: 'Oxanium';
+        src: url('./assets/Oxanium/static/Oxanium-ExtraBold.ttf') format('truetype');
+        font-weight: 900;
+    }
 }
 
-@font-face {
-    font-family: 'Oxanium';
-    src: url('./assets/Oxanium/static/Oxanium-Regular.ttf') format('truetype');
-}
 
 @theme {
     --font-heading: Orbitron, sans-serif;
     --font-body: Oxanium, sans-serif;
+    --bg-glass: url("./assets/noise-texture-svg.svg")
+}
+
+.svg-defs {
+    height: 0;
+    width: 0;
+    position: absolute;
 }
 
 #root {
@@ -56,23 +88,28 @@
 }
 
 .header {
-    font-size: 2em;
-    @apply font-heading text-cyan-400 text-6xl;
+    @apply font-heading text-shadow-lg text-shadow-black/60  text-cyan-400/90 text-6xl sm:text-4xl;
     margin-bottom: 1em;
 }
 
 .app {
+    @apply max-w-[720px] ;
 }
 
 .app > * {
-    margin: 1em;
+
 }
 
 .card {
-    padding: 2em;
-    @apply bg-neutral-900/75  border-2 border-blue-400/40 ;
-    @apply hover:border-blue-400/60 rounded-3xl;
-    @apply shadow-lg shadow-neutral-700/75;
+    @apply h-full w-full  relative m-auto p-8 my-6;
+    @apply backdrop-filter-[--bg-glass] backdrop-blur-lg bg-white/10  border border-blue-400/15 rounded-xl;
+    @apply hover:border-blue-400/25;
+    @apply shadow-lg shadow-gray-900/75;
+}
+
+.lift {
+    /*@apply flex flex-col items-center justify-center px-2;*/
+    @apply hover:translate-y-[-2px];
 }
 
 .read-the-docs {
