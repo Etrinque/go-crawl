@@ -23,8 +23,8 @@ const Summary = () => {
   return (
       <div className={"card justify-center gap-2"}>
         <span className={"font-body text-3xl"}>Summary</span>
-        <div className={"pt-3"}>
-          <div className={"grid grid-cols-2  lg:grid-cols-4 gap-4"}>
+        <div className={""}>
+          <div className={"grid grid-cols-2  lg:grid-cols-4 gap-4 mb-4"}>
             {logSummaries.map((log) => (
                 <SummaryCard title={log.level} total={log.total}/>
             ))}
